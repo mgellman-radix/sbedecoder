@@ -23,16 +23,15 @@ def process_file(pcap_filename, mdp_parser, secdef, pretty_print, print_data, sk
         packet_number = 0
         for ts, packet in pcap_reader:
             packet_number += 1
-            ethernet = dpkt.ethernet.Ethernet(packet)
-            if ethernet.type == dpkt.ethernet.ETH_TYPE_IP:
-                ip = ethernet.data
-                if ip.p == dpkt.ip.IP_PROTO_UDP:
-                    udp = ip.data
-                    try:
-                        timestamp = datetime.fromtimestamp(ts)
-                        mdp.decode.decode_packet(mdp_parser, timestamp, udp.data, skip_fields, print_data, pretty_print, secdef)
-                    except Exception as e:
-                        print('Error parsing packet #{} - {}'.format(packet_number, e))
+            ip = dpkt.ip.IP(packet)
+            if ip.p == dpkt.ip.IP_PROTO_UDP:
+                udp = ip.data
+                try:
+                    timestamp = datetime.fromtimestamp(ts)
+                    mdp.decode.decode_packet(mdp_parser, timestamp, udp.data, skip_fields, print_data, pretty_print, secdef)
+                except Exception as e:
+                    print('Error parsing packet #{} - {}'.format(packet_number, e))
+                    raise
 
 
 def process_command_line():
